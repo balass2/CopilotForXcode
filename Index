@@ -1,0 +1,64 @@
+import React, { useState } from "react"; import { Card, CardContent } from "@/components/ui/card"; import { Input } from "@/components/ui/input"; import { Button } from "@/components/ui/button"; import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+export default function ExchangeApp() { const [paypalAmount, setPaypalAmount] = useState(0); const [usdtAmount, setUsdtAmount] = useState(0); const [rate] = useState(1.01); // Custom rate const [step, setStep] = useState("form"); const [user, setUser] = useState({ email: "", wallet: "" });
+
+const calculateUSDT = (value) => { const paypalVal = parseFloat(value); setPaypalAmount(paypalVal); setUsdtAmount((paypalVal / rate).toFixed(2)); };
+
+const handleSubmit = () => { if (!user.email || !user.wallet || paypalAmount <= 0) return; setStep("confirm"); };
+
+return ( <div className="max-w-xl mx-auto mt-10 p-4"> <h1 className="text-2xl font-bold text-center mb-6">Обмен PayPal → USDT</h1>
+
+<Tabs defaultValue="exchange">
+    <TabsList className="grid w-full grid-cols-2 mb-4">
+      <TabsTrigger value="exchange">Обмен</TabsTrigger>
+      <TabsTrigger value="account">Кабинет</TabsTrigger>
+    </TabsList>
+
+    <TabsContent value="exchange">
+      <Card>
+        <CardContent className="space-y-4 py-6">
+          {step === "form" && (
+            <>
+              <Input
+                type="number"
+                placeholder="Сумма в PayPal (USD)"
+                onChange={(e) => calculateUSDT(e.target.value)}
+              />
+              <Input
+                type="email"
+                placeholder="Ваш Email"
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
+              />
+              <Input
+                placeholder="Ваш USDT-кошелек (TRC20, ERC20...)"
+                onChange={(e) => setUser({ ...user, wallet: e.target.value })}
+              />
+              <div className="text-sm text-gray-600">
+                К получению: <strong>{usdtAmount} USDT</strong>
+              </div>
+              <Button onClick={handleSubmit}>Перейти к оплате</Button>
+            </>
+          )}
+
+          {step === "confirm" && (
+            <div className="text-center space-y-4">
+              <p className="text-green-600 font-semibold">
+                Шаг 2: Оплатите {paypalAmount} USD на PayPal
+              </p>
+              <p className="text-sm">Адрес для оплаты:</p>
+              <p className="bg-gray-100 p-2 rounded font-mono">youremail@paypal.com</p>
+              <p className="text-sm text-gray-500">После оплаты ожидайте перевод {usdtAmount} USDT на {user.wallet}</p>
+              <Button onClick={() => setStep("form")}>Новый обмен</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </TabsContent>
+
+    <TabsContent value="account">
+      <Card>
+        <CardContent className="space-y-4 py-6">
+          <p>Email: {user.email || "не указано"}</p>
+          <p>USDT-кошелек: {user.wallet || "не указано"}</p>
+          <p>Последняя сумма: {paypalAmount} USD → {usdtAmount} USDT</p>
+        </Card
